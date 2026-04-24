@@ -2,14 +2,14 @@ namespace Cirreum.Identity.Provisioning;
 
 /// <summary>
 /// Modeling guide for the invitation entity used in
-/// <see cref="UserProvisionerBase{TUser}.RedeemInvitationAsync"/>.
+/// <see cref="InvitationUserProvisionerBase{TUser}.RedeemInvitationAsync"/>.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Implement this interface on the invitation entity your application stores in its database.
-/// It is not used as a generic constraint by <see cref="UserProvisionerBase{TUser}"/> —
+/// It is not used as a generic constraint by <see cref="InvitationUserProvisionerBase{TUser}"/> —
 /// the find, expiry check, and claim are performed atomically inside
-/// <see cref="UserProvisionerBase{TUser}.RedeemInvitationAsync"/>, giving the
+/// <see cref="InvitationUserProvisionerBase{TUser}.RedeemInvitationAsync"/>, giving the
 /// implementation full control over the transaction boundary.
 /// </para>
 /// <para>
