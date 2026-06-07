@@ -252,7 +252,7 @@ public sealed class MyIdpIdentityProviderRegistrar
 
 ## Versioning
 
-Follows [Semantic Versioning](https://semver.org/). Given its foundational role, major bumps are rare and carefully considered.
+Follows [Semantic Versioning](https://semver.org/).
 
 ## License
 
