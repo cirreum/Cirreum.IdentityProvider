@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The registrar's duplicate-instance-key guard was process-global static state: a
+  second host composed in the same process (the integration-test norm) re-registering
+  the same instance key threw "already been registered" even though its own
+  composition was clean. Guard state now lives in the service collection, so hosts
+  are fully isolated (ADR-0028 principle; rider on the ADR-0030/0031 wave).
+
 ## [1.0.7] - 2026-07-18
 
 ### Updated

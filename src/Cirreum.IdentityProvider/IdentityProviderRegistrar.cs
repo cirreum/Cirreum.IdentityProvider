@@ -34,8 +34,6 @@ public abstract class IdentityProviderRegistrar<TSettings, TInstanceSettings>
 	where TInstanceSettings : IdentityProviderInstanceSettings
 	where TSettings : IdentityProviderSettings<TInstanceSettings> {
 
-	private static readonly Dictionary<string, string> ProcessedInstances = [];
-
 	/// <inheritdoc/>
 	public ProviderType ProviderType => ProviderType.Identity;
 
@@ -95,12 +93,16 @@ public abstract class IdentityProviderRegistrar<TSettings, TInstanceSettings>
 		IServiceCollection services,
 		IConfiguration configuration) {
 
-		// Guard against duplicate registration of the same instance key across multiple calls
+		// Guard against duplicate registration of the same instance key across multiple
+		// calls. State is scoped to this service collection — it lives in the
+		// composition, not the process, so multiple hosts in one process are isolated.
 		var providerRegistrationKey = $"Cirreum.{this.ProviderType}.{this.ProviderName}::{key}";
-		if (!ProcessedInstances.TryAdd(providerRegistrationKey, $"{settings.GetHashCode()}")) {
+		if (services.Any(d => d.ImplementationInstance is ProcessedInstanceKey processed
+			&& processed.Value == providerRegistrationKey)) {
 			throw new InvalidOperationException(
 				$"A provisioning instance with the key '{key}' for provider '{this.ProviderName}' has already been registered.");
 		}
+		services.AddSingleton(new ProcessedInstanceKey(providerRegistrationKey));
 
 		// Must have settings
 		if (settings is null) {
