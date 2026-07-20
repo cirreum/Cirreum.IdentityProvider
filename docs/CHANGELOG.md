@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-07-20
+
 ### Fixed
 
 - The registrar's duplicate-instance-key guard was process-global static state: a
