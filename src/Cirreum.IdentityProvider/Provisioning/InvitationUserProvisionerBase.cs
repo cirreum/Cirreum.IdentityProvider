@@ -6,7 +6,7 @@ namespace Cirreum.Identity.Provisioning;
 /// valid, unclaimed invitation matching their email address.
 /// </summary>
 /// <typeparam name="TUser">
-/// The application's user entity. Must implement <see cref="IProvisionedUser"/>.
+/// The application's user entity. Must implement <see cref="IProvisionedIdentity"/>.
 /// </typeparam>
 /// <remarks>
 /// <para>
@@ -62,7 +62,7 @@ namespace Cirreum.Identity.Provisioning;
 /// </code>
 /// </example>
 public abstract class InvitationUserProvisionerBase<TUser> : UserProvisionerBase<TUser>
-	where TUser : IProvisionedUser {
+	where TUser : IProvisionedIdentity {
 
 	/// <inheritdoc />
 	protected override async Task<ProvisionResult> ProvisionNewUserAsync(
@@ -79,7 +79,7 @@ public abstract class InvitationUserProvisionerBase<TUser> : UserProvisionerBase
 			cancellationToken);
 
 		return newUser is not null
-			? ProvisionResult.Allow(newUser.Roles)
+			? ProvisionResult.Allow(newUser.Claims)
 			: ProvisionResult.Deny();
 	}
 
@@ -101,7 +101,7 @@ public abstract class InvitationUserProvisionerBase<TUser> : UserProvisionerBase
 	/// The newly created user record if a valid invitation was found and successfully
 	/// claimed, or <see langword="null"/> if no matching invitation exists, it has expired,
 	/// or it has already been claimed. The base class reads
-	/// <see cref="IProvisionedUser.Roles"/> from the returned instance to populate the
+	/// <see cref="IProvisionedIdentity.Claims"/> from the returned instance to populate the
 	/// issued token.
 	/// </returns>
 	/// <remarks>

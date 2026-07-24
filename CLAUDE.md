@@ -15,8 +15,8 @@ dotnet build Cirreum.IdentityProvider.slnx
 # Build specific projects
 dotnet build src/Cirreum.IdentityProvider/Cirreum.IdentityProvider.csproj
 
-# Run tests (when test projects are added)
-dotnet test
+# Run tests (separate test solution)
+dotnet test tests/Cirreum.IdentityProvider.Tests.slnx
 
 # Create NuGet packages (local release builds use version 1.0.100-rc)
 dotnet pack --configuration Release
@@ -46,10 +46,12 @@ Provider-specific Runtime Extensions packages (`Cirreum.Runtime.Identity.*`) sur
 
 **Provisioning contracts** (`Provisioning/` folder, `namespace Cirreum.Identity.Provisioning`)
 - `IUserProvisioner` — the app's hook into the pre-token callback
-- `UserProvisionerBase<TUser>` — standard invitation-redemption base
+- `UserProvisionerBase<TUser>` — standard returning-user / onboard base (`TUser : IProvisionedIdentity`)
+- `IdentityClaim` — one claim to mint (`custom*` wire namespace); factories `Roles`/`Name`/`Of`; `CustomClaimNames` + `IdentityClaimExtensions.ToClaimMap`
 - `ProvisionContext` — callback payload passed to provisioners
-- `ProvisionResult` — `Allowed(roles)` / `Denied` discriminated outcome
-- `IProvisionedUser` — constraint on the app's user entity
+- `ProvisionResult` — `Allowed(Claims)` / `Denied` discriminated outcome
+- `IProvisionedIdentity` — the lightweight identity the app provisions (`ExternalUserId` + `Claims`)
+- `ProvisioningTelemetry` / `ProvisioningTrace` — OpenTelemetry span + metrics for the callback
 - `IPendingInvitation` — modeling guide for invitation entities
 
 ### Namespace convention
@@ -91,7 +93,7 @@ src/Cirreum.IdentityProvider/    # Main library
     ├── UserProvisionerBase.cs
     ├── ProvisionContext.cs
     ├── ProvisionResult.cs
-    ├── IProvisionedUser.cs
+    ├── IProvisionedIdentity.cs
     └── IPendingInvitation.cs
 ```
 
@@ -100,6 +102,6 @@ src/Cirreum.IdentityProvider/    # Main library
 - Uses .NET 10.0 with latest C# language version
 - Nullable reference types enabled
 - CI/CD aware build configuration (detects Azure DevOps, GitHub Actions)
-- Currently contains only the main library project (no test projects yet)
+- Tests live in the dedicated `tests/Cirreum.IdentityProvider.Tests.slnx` solution (xUnit + FluentAssertions + NSubstitute), never in the main slnx; run with `dotnet test tests/Cirreum.IdentityProvider.Tests.slnx`
 - File-scoped namespaces throughout
 - K&R braces, tabs for indentation (matches repo `.editorconfig`)

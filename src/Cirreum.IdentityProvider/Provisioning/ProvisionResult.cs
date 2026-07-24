@@ -7,7 +7,7 @@ namespace Cirreum.Identity.Provisioning;
 /// <remarks>
 /// Use the static factory methods to construct a result:
 /// <list type="bullet">
-///   <item><description><see cref="Allow(string[])"/> — grant access with the specified roles</description></item>
+///   <item><description><see cref="Allow(IReadOnlyList{IdentityClaim})"/> — grant access, embedding the given claims</description></item>
 ///   <item><description><see cref="Deny()"/> — block token issuance for this user</description></item>
 /// </list>
 /// </remarks>
@@ -18,9 +18,10 @@ public abstract record ProvisionResult {
 	private ProvisionResult() { }
 
 	/// <summary>
-	/// The user is allowed; the specified roles will be embedded in the issued token.
+	/// The user is allowed; the given claims are embedded in the issued token. An empty set is
+	/// valid — the user is admitted with no custom claims.
 	/// </summary>
-	public sealed record Allowed(IReadOnlyList<string> Roles) : ProvisionResult;
+	public sealed record Allowed(IReadOnlyList<IdentityClaim> Claims) : ProvisionResult;
 
 	/// <summary>
 	/// The user is denied; token issuance will be blocked.
@@ -28,16 +29,12 @@ public abstract record ProvisionResult {
 	public sealed record Denied : ProvisionResult;
 
 	/// <summary>
-	/// Grants the user access and embeds the specified roles in the issued token.
+	/// Grants the user access and embeds the given claims in the issued token.
 	/// </summary>
-	/// <param name="roles">One or more role values to embed as custom claims.</param>
-	public static ProvisionResult Allow(params string[] roles) => new Allowed(roles);
-
-	/// <summary>
-	/// Grants the user access and embeds the specified roles in the issued token.
-	/// </summary>
-	/// <param name="roles">The role values to embed as custom claims.</param>
-	public static ProvisionResult Allow(IReadOnlyList<string> roles) => new Allowed(roles);
+	/// <param name="claims">
+	/// The claims to mint. May be empty to admit the user with no custom claims.
+	/// </param>
+	public static ProvisionResult Allow(IReadOnlyList<IdentityClaim> claims) => new Allowed(claims);
 
 	/// <summary>
 	/// Blocks token issuance for this user. The login will be rejected by the identity provider.

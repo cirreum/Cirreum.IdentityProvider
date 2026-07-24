@@ -5,14 +5,14 @@ namespace Cirreum.Identity.Provisioning;
 /// standard "returning user or onboard" orchestration.
 /// </summary>
 /// <typeparam name="TUser">
-/// The application's user entity. Must implement <see cref="IProvisionedUser"/>.
+/// The application's user entity. Must implement <see cref="IProvisionedIdentity"/>.
 /// </typeparam>
 /// <remarks>
 /// <para>
 /// This base encodes the universal two-step flow every provisioner performs:
 /// </para>
 /// <list type="number">
-///   <item><description>Look up an existing user by external user ID — if found, allow with stored roles.</description></item>
+///   <item><description>Look up an existing user by external user ID — if found, allow with its claims.</description></item>
 ///   <item><description>Otherwise, delegate to <see cref="ProvisionNewUserAsync"/> for onboarding.</description></item>
 /// </list>
 /// <para>
@@ -30,7 +30,7 @@ namespace Cirreum.Identity.Provisioning;
 /// </para>
 /// </remarks>
 public abstract class UserProvisionerBase<TUser> : IUserProvisioner
-	where TUser : IProvisionedUser {
+	where TUser : IProvisionedIdentity {
 
 	/// <inheritdoc />
 	/// <remarks>
@@ -46,7 +46,7 @@ public abstract class UserProvisionerBase<TUser> : IUserProvisioner
 			cancellationToken);
 
 		if (user is not null) {
-			return ProvisionResult.Allow(user.Roles);
+			return ProvisionResult.Allow(user.Claims);
 		}
 
 		return await this.ProvisionNewUserAsync(context, cancellationToken);
@@ -76,8 +76,8 @@ public abstract class UserProvisionerBase<TUser> : IUserProvisioner
 	/// <param name="context">The provisioning context from the identity-provider callback.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
 	/// <returns>
-	/// <see cref="ProvisionResult.Allow(string[])"/> to grant access with the chosen roles,
-	/// or <see cref="ProvisionResult.Deny()"/> to block token issuance.
+	/// <see cref="ProvisionResult.Allow(IReadOnlyList{IdentityClaim})"/> to grant access with the
+	/// chosen claims, or <see cref="ProvisionResult.Deny()"/> to block token issuance.
 	/// </returns>
 	protected abstract Task<ProvisionResult> ProvisionNewUserAsync(
 		ProvisionContext context,

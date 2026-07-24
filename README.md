@@ -19,7 +19,7 @@ Apps do **not** reference this package directly — they install a Runtime Exten
 All Cirreum Identity providers share a common shape:
 
 - The IdP calls back into the app during sign-in with a payload describing the authenticating user.
-- The app's `IUserProvisioner` decides whether the user is allowed in and what roles to embed in the issued token.
+- The app's `IUserProvisioner` decides whether the user is allowed in and what claims to mint into the issued token.
 - A concrete provisioning provider (e.g. OIDC webhook, Entra External ID) wires up the HTTP endpoint, validates the inbound request, builds a `ProvisionContext`, resolves the keyed provisioner, and returns the appropriate response format for that IdP.
 
 ## Two-phase registration
@@ -97,13 +97,33 @@ The instance key under `Instances:` serves double duty: it is both the logical i
 | `InvitationUserProvisionerBase<TUser>` | Specialization for invitation-based onboarding. Abstract `RedeemInvitationAsync`. |
 | `SelfServiceUserProvisionerBase<TUser>` | Specialization for self-service onboarding. Abstract `CreateSelfServiceUserAsync`. |
 | `ProvisionContext` | Callback payload: `Source`, `ExternalUserId`, `CorrelationId`, `ClientAppId`, `Email`. |
-| `ProvisionResult` | Discriminated outcome — `Allowed(roles)` or `Denied`. |
-| `IProvisionedUser` | Constraint on the app's user entity — exposes `ExternalUserId` + `Roles`. |
+| `ProvisionResult` | Discriminated outcome — `Allowed(Claims)` or `Denied`. |
+| `IProvisionedIdentity` | The lightweight identity the app provisions — exposes `ExternalUserId` + `Claims` (distinct from the full `IApplicationUser`). |
+| `IdentityClaim` | One claim to mint, built via `IdentityClaim.Roles(...)`, `.Name(...)`, or `.Of(name, ...)`. Lives in a collision-safe `custom*` wire namespace. |
 | `IPendingInvitation` | Modeling guide for invitation entities (used by invitation-based provisioners). |
 
 ## Implementing a provisioner
 
 Consumer apps implement `IUserProvisioner` via the base that matches the onboarding model for a given instance. One concrete class per configured instance.
+
+### The provisioned-identity type
+
+Your user type implements `IProvisionedIdentity` — the lightweight identity (external id + the claims to mint), distinct from your full `IApplicationUser`. The base provisioner reads `ExternalUserId` for lookup and `Claims` for the token; roles are one claim among any others you mint:
+
+```csharp
+using Cirreum.Identity.Provisioning;
+
+public sealed class BorrowerUser : IProvisionedIdentity {
+    public required string ExternalUserId { get; init; }
+    public string? Email { get; init; }
+    public IReadOnlyList<string> Roles { get; init; } = [];
+
+    // The claims to mint — roles here, plus name/tenant/etc. as needed.
+    public IReadOnlyList<IdentityClaim> Claims => [IdentityClaim.Roles(Roles)];
+}
+```
+
+Whether a user *must* carry roles is expressed by your type's shape (a required `Roles`), not a framework flag; an app whose authorization is ownership-based can leave `Claims` empty.
 
 ### Invitation-based
 
@@ -170,13 +190,13 @@ public sealed class HybridProvisioner(AppDbContext db, IInvitationService invita
         // Try invitation first
         var invited = await invitations.TryClaimAsync(context.Email, context.ExternalUserId, ct);
         if (invited is not null) {
-            return ProvisionResult.Allow(invited.Roles);
+            return ProvisionResult.Allow([IdentityClaim.Roles(invited.Roles)]);
         }
 
         // Fall through to self-service with default role
         var user = await this.CreateDefaultUserAsync(context, ct);
         return user is not null
-            ? ProvisionResult.Allow(user.Roles)
+            ? ProvisionResult.Allow(user.Claims)
             : ProvisionResult.Deny();
     }
 

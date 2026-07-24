@@ -6,7 +6,7 @@ namespace Cirreum.Identity.Provisioning;
 /// is allowed in, and a user record is created on first sign-in.
 /// </summary>
 /// <typeparam name="TUser">
-/// The application's user entity. Must implement <see cref="IProvisionedUser"/>.
+/// The application's user entity. Must implement <see cref="IProvisionedIdentity"/>.
 /// </typeparam>
 /// <remarks>
 /// <para>
@@ -46,7 +46,7 @@ namespace Cirreum.Identity.Provisioning;
 /// </code>
 /// </example>
 public abstract class SelfServiceUserProvisionerBase<TUser> : UserProvisionerBase<TUser>
-	where TUser : IProvisionedUser {
+	where TUser : IProvisionedIdentity {
 
 	/// <inheritdoc />
 	protected override async Task<ProvisionResult> ProvisionNewUserAsync(
@@ -58,13 +58,13 @@ public abstract class SelfServiceUserProvisionerBase<TUser> : UserProvisionerBas
 			cancellationToken);
 
 		return newUser is not null
-			? ProvisionResult.Allow(newUser.Roles)
+			? ProvisionResult.Allow(newUser.Claims)
 			: ProvisionResult.Deny();
 	}
 
 	/// <summary>
-	/// Creates the application user record for a first-time sign-in and chooses the
-	/// initial role(s) to embed in the issued token.
+	/// Creates the application user record for a first-time sign-in and chooses the claims it
+	/// mints into the issued token (via <see cref="IProvisionedIdentity.Claims"/>).
 	/// </summary>
 	/// <param name="context">The provisioning context from the identity-provider callback.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>

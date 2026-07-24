@@ -41,12 +41,12 @@ namespace Cirreum.Identity.Provisioning;
 ///         var invitation = await invitations.RedeemAsync(context.ExternalUserId, cancellationToken);
 ///         if (invitation is not null) {
 ///             await users.CreateAsync(context.ExternalUserId, invitation.Role, cancellationToken);
-///             return ProvisionResult.Allow(invitation.Role);
+///             return ProvisionResult.Allow([IdentityClaim.Roles(invitation.Role)]);
 ///         }
 ///
 ///         var existing = await users.FindAsync(context.ExternalUserId, cancellationToken);
 ///         if (existing is not null) {
-///             return ProvisionResult.Allow(existing.Role);
+///             return ProvisionResult.Allow([IdentityClaim.Roles(existing.Role)]);
 ///         }
 ///
 ///         return ProvisionResult.Deny();
@@ -58,14 +58,14 @@ public interface IUserProvisioner {
 
 	/// <summary>
 	/// Provisions the user and returns whether they are allowed into the application,
-	/// along with the roles to embed in the issued token.
+	/// along with the claims to mint into the issued token.
 	/// </summary>
 	/// <param name="context">
 	/// Context about the user and calling application during token issuance.
 	/// </param>
 	/// <param name="cancellationToken">Cancellation token.</param>
 	/// <returns>
-	/// <see cref="ProvisionResult.Allow(string[])"/> with at least one role to permit the login,
+	/// <see cref="ProvisionResult.Allow(IReadOnlyList{IdentityClaim})"/> to permit the login,
 	/// or <see cref="ProvisionResult.Deny()"/> to block token issuance.
 	/// </returns>
 	Task<ProvisionResult> ProvisionAsync(

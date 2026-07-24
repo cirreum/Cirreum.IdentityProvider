@@ -24,6 +24,7 @@
 		<Using Include="Xunit" />
 		<Using Include="FluentAssertions" />
 		<Using Include="NSubstitute" />
+		<Using Include="Cirreum.Identity.Provisioning" />
 	</ItemGroup>
 
 	<ItemGroup>
