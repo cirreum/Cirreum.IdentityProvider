@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-23
+
 Provisioning widens beyond roles: an application now supplies an arbitrary set of identity
 claims to mint into the issued token, with roles folded in as one claim among them. Every
 provisioned claim lives in a `custom*` wire namespace that cannot collide with a native
