@@ -29,7 +29,8 @@ public readonly struct ProvisioningTrace : IDisposable {
 		this._provider = provider;
 		this._instance = instance;
 		this._startTimestamp = Stopwatch.GetTimestamp();
-		this._activity = ProvisioningTelemetry.ActivitySource.StartActivity("identity.provision");
+		this._activity = ProvisioningTelemetry.ActivitySource.StartActivity(
+			"identity.provision", ActivityKind.Internal);
 		if (this._activity is not null) {
 			this._activity.SetTag(ProviderTag, provider);
 			this._activity.SetTag(InstanceTag, instance);

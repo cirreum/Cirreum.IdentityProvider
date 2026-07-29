@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `ProvisioningTrace` now states `ActivityKind.Internal` explicitly on the `identity.provision`
+  activity instead of taking the silent default. `Internal` was already the effective — and
+  correct — kind: the span wraps the admit/deny and claim-mint decision *inside* the ASP.NET
+  request that received the callback, so it is not the span where work arrives. No behavior
+  change; the kind is now a recorded decision rather than an omission, per the convention that
+  tracks pass the kind explicitly even when it is `Internal`.
+
 ### Updated
 
 - Updated NuGet packages.
