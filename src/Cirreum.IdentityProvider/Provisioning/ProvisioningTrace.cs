@@ -48,7 +48,7 @@ public readonly struct ProvisioningTrace : IDisposable {
 	public void Failed() => this.Record("error", ActivityStatusCode.Error, claimCount: null);
 
 	private void Record(string outcome, ActivityStatusCode status, int? claimCount) {
-		var elapsedMs = Stopwatch.GetElapsedTime(this._startTimestamp).TotalMilliseconds;
+		var elapsed = Stopwatch.GetElapsedTime(this._startTimestamp).TotalSeconds;
 
 		var tags = new TagList {
 			{ ProviderTag, this._provider },
@@ -56,7 +56,7 @@ public readonly struct ProvisioningTrace : IDisposable {
 			{ OutcomeTag, outcome },
 		};
 
-		ProvisioningTelemetry.Duration.Record(elapsedMs, tags);
+		ProvisioningTelemetry.Duration.Record(elapsed, tags);
 		ProvisioningTelemetry.Count.Add(1, tags);
 
 		if (claimCount is int count) {

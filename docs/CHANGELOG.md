@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **The provisioning duration histogram records seconds, under a new name:**
+  `cirreum.identity.provision.duration` (`ms`) is now `cirreum.identity.provisioning.duration`
+  (`s`). Update dashboards and alerts — a 250 ms threshold is now `0.25`. This follows the
+  OpenTelemetry semantic conventions and the .NET built-in request-duration histograms, as every
+  Cirreum duration histogram now does. The name changed with the unit so a query on the old name
+  returns nothing rather than values 1000× off. The histogram carries seconds-sized bucket
+  boundaries (`0.005` … `10`); the OpenTelemetry SDK's defaults are sized for milliseconds.
+  `cirreum.identity.provision.count` and `cirreum.identity.provision.claims` are unchanged.
+
+### Updated
+
+- Updated NuGet packages.
+
 ## [2.0.2] - 2026-08-16
 
 ### Updated
